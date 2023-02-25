@@ -1,0 +1,164 @@
+---
+title: "Untitled"
+author: "ayşenur kökcü 20201101043"
+date: "2023-02-25"
+output: html_document
+---
+
+
+```{r}
+x1 <- data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`# x değerlerini atar
+y1 <- data_ex_7_5_Inventory_Sim_$`Average Annual Cost, yi` # y değerlerini atar.
+
+```
+
+
+```{r}
+#Normallik testi
+
+attach(data_ex_7_5_Inventory_Sim_)
+install.packages("dplyr")
+install.packages("ggpubr")
+library(dplyr)
+library(ggpubr)
+ggdensity(y1, main= "Average Annual Cost",xlab = "Average Annual Cost")
+ggqqplot(y1)
+boxplot((data_ex_7_5_Inventory_Sim_$`Average Annual Cost, yi`))
+boxplot(data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`)
+hist(data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`)
+hist(data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`)
+shapiro.test(y1) # Eğer veri seti 50 den küçük olduğu shapiro wilk testi
+shapiro.test(data_ex_7_5_Inventory_Sim_$`Average Annual Cost, yi`)
+shapiro.test(data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`)
+#Verimiz 50’den küçük olduğu için normallik testini shapiro testiyle yapıyoruz.
+#p-value değeri 0,05 değerinden büyük olduğu için dağılımın normal dağıldığını söyleyebiliriz.
+
+```
+
+
+```{r}
+#Regresyon modelinin tahmini
+
+model=lm(y1~x1) # Basit doğrusal regresyon modelini sağlar.
+#Modelimizde 1 tane bağımsız değişken olduğu için basit doğrusal regresyondur.
+summary(model) #Modelin özet sonuçlarını gösterir.
+confint(model, level=0.95) #Model katsayılarının güven aralıklarını verir.
+plot(data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`, data_ex_7_5_Inventory_Sim_$`Average Annual Cost, yi` ) #saçılım grafiği
+cor(data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`, data_ex_7_5_Inventory_Sim_$`Average Annual Cost, yi`) #korelasyon katsayısı
+abline(model) #regresyon doğrusu
+names(model)
+model$fitted.values # regresyon doğrusu üzerinde yer alan nokta ve değerleri gösterir.
+fitted(model)
+prediction=predict(model, interval = "prediction") #kestirim aralıkları uyum değerlerinin alt ve üst sınırlarını verir.
+prediction
+confidence=predict(model, interval = "confidence") # uyum değerleri ve güven aralıklarını verir.
+confidence
+plot(data_ex_7_5_Inventory_Sim_$`Reorder Quantity, xi`,model$fitted) #fit (uyum) değerlerin saçılım grafiği
+coef(model) # regresyon katsayıları
+coef(model) [1] #modelin 1. katsayısını verir (bo)
+model$coef[1]+model$coef[2]*50 # x 50 iken y nin alacağı değer
+#Daha sonra Regresyon modelinin tahminini yapıyoruz. Modelimiz Basit Doğrusal Regresyon olduğu için “model=lm(y1~x1)” yazıyoruz. Residual, Coefficients ve sig. değerlerimiz, F değeri ve belirtme kat sayısı değerleriyle model tahmini yapabiliriz.
+#R square değeri 0,14 olduğu için ortalama maliyet %14 oranında yeniden verilen siparişle açıklanabilir diyebiliriz. Modelin anlamlılığını test etmek istersek de F hesap değerine bakabiliriz. F değeri 1,375 olduğu için F tablo değeri bu değerden daha büyük olduğu için model anlamsızdır.
+#Değişkenler arasında doğrusal ya da eğrisel bir ilişki olduğunu anlamak için saçılım grafiğine bakarız. Bu grafikte doğrusal bir ilişki gözlenemez. Parabolik bir eğri söz konusu. 
+
+predict(model, list(x1=50)) # x 50 iken y nin alacağı değer
+predict(model, data.frame(x1=50)) # x 50 iken y nin alacağı değer
+predict(model, data.frame(x1=c(50, 75, 100))) # birden fazla x değeri için y nin alacağı değerler
+predict(model, data.frame(x1=c(50, 75, 100)), interval = "confidence", level=0.95) # x in değerleri için y nin değerleri ve  %95 lik güven aralıkları
+predict(model, data.frame(x1=c(50, 75, 100)), interval = "prediction", level=0.95) # x in değerleri ve y nin uyum değerleri ve alt ve üst sınırları
+
+confidence = predict(model, interval = "confidence") # güven aralıkları 
+confidence
+
+```
+
+```{r}
+# Korelasyonlar
+cor.test(x1,y1)  # korelasyon testi
+cor.test(x1,y1,alternative = c("two.sided", "less","greater"), method = c("pearson", "kendall", "spearman"), exact = NULL, conf.level = 0.95)
+cor.test(x1,y1,alternative = c("two.sided", "less","greater"), method = c("spearman"), exact = NULL, conf.level = 0.95)
+
+```
+
+```{r}
+#Kestirim aralıkları grafikleri
+plot(y1~x1)
+X1.sort=sort(unique(x1))
+prediction=predict(model, newdata=data.frame(x1=X1.sort), interval = "prediction")
+prediction
+lines(X1.sort,prediction[,2],lty=2)
+lines(X1.sort,prediction[,3],lty=2)
+plot(y1~x1)
+```
+
+
+
+
+
+
+```{r}
+# Güven aralıkları grafikleri
+X1.sort=sort(unique(x1))
+confidence=predict(model, newdata=data.frame(x1=X1.sort), interval = "confidence")
+confidence
+lines(X1.sort,confidence[,2],lty=2)
+lines(X1.sort,confidence[,3],lty=2)
+```
+
+
+```{r}
+# Standart sapmalar
+standatdevx1=sd(x1,na.rm=FALSE) 
+standatdevx1 # x e ait standart sapma
+standatdevy1=sd(y1,na.rm=FALSE)
+standatdevy1 # y e ait standart sapma# Standart sapmalar
+standatdevx1=sd(x1,na.rm=FALSE) 
+standatdevx1 # x e ait standart sapma
+standatdevy1=sd(y1,na.rm=FALSE)
+standatdevy1 # y e ait standart sapma
+```
+
+
+
+```{r}
+# x ile y arasında kovaryans
+cov(x1,y1)
+```
+
+```{r}
+#varyans analizi tablosu
+anova(model)
+
+uyum =fitted(model)
+uyum
+res=resid(model)
+res
+newd <- data.frame(x1=c(50,75,100,125,150,175,200,225,250,275))
+k = predict(lm(y1~x1), newd, se.fit = TRUE)
+k
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
