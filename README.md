@@ -1,3 +1,2 @@
 # R--LE-REGRESYON-ANAL-Z-
-
-YENİDEN VERİLEN MAL SİPARİŞİYLE ORTALAMA YILLIK MALİYET ARASINDAKİ İLİŞKİYİ İNCElEYEN REGRESYON ANALİZİ
+Yeniden Verilen Mal Siparişiyle Ortalama Yıllık Maliyet Arasındaki İlişkiyi İnceleyen Regresyon Analizi
